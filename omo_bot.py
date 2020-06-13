@@ -1,8 +1,17 @@
 from keys import consumer_key, consumer_secret, key, secret
+from email_info import email, password
+
+import random
+import smtplib
 import tweepy
 import time
 
 FILE_NAME = 'last_seen.txt'
+
+REPLIES = [
+    "Don't be razz please", 
+    "Guy behave", 
+]
 
 auth = tweepy.OAuthHandler(consumer_key, consumer_secret)
 auth.set_access_token(key, secret)
@@ -19,7 +28,7 @@ def reply_omo_tweets():
     time_line_tweets = api.home_timeline(read_last_seen(FILE_NAME))
     for tweet in time_line_tweets:
         if 'omo' in tweet.text.lower().split() and tweet.text[:2] != 'RT':
-            api.update_status('@' + tweet.user.screen_name + " Don't be razz please", tweet.id)
+            api.update_status('@' + tweet.user.screen_name + ' ' + REPLIES[random.randint(0,1)], tweet.id)
             store_last_seen(FILE_NAME, tweet.id)
     return
 
@@ -35,7 +44,23 @@ def store_last_seen(FILE_NAME, last_seen_id):
     file_write.close()
     return
 
-while True:
-    follow_back()
-    reply_omo_tweets()
-    time.sleep(15)
+def runBot():
+    count = 0
+
+    while True:
+        follow_back()
+        reply_omo_tweets()
+        time.sleep(60)
+
+try:
+    runBot()
+
+except Exception as e:
+    subject = "Omo-Bot is down"
+    text = e
+    message = 'Subject: {}\n\n{}'.format(subject, text)
+
+    server = smtplib.SMTP_SSL('smtp.gmail.com', 465)
+    server.login(email, password)
+    server.sendmail(email, email, message)
+    server.quit()
