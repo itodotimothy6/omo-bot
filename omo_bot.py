@@ -45,8 +45,6 @@ def store_last_seen(FILE_NAME, last_seen_id):
     return
 
 def runBot():
-    count = 0
-
     while True:
         follow_back()
         reply_omo_tweets()
